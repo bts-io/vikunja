@@ -92,10 +92,11 @@ type Config struct {
 	Color  string
 }
 
-// getCaldavColor sanitizes color at the output boundary (non-hex chars
-// dropped) so upstream HexColor validation gaps cannot lead to iCal
-// property injection via CR/LF in a crafted color string.
-func getCaldavColor(color string) (caldavcolor string) {
+// AppleColor returns color as #RRGGBBFF, or "" when there is none. Non-hex
+// chars are dropped at the output boundary so upstream HexColor validation
+// gaps cannot lead to iCal property injection via CR/LF in a crafted color
+// string.
+func AppleColor(color string) string {
 	color = strings.TrimPrefix(color, "#")
 
 	var b strings.Builder
@@ -110,7 +111,14 @@ func getCaldavColor(color string) (caldavcolor string) {
 		return ""
 	}
 
-	color = "#" + color + "FF"
+	return "#" + color + "FF"
+}
+
+func getCaldavColor(color string) (caldavcolor string) {
+	color = AppleColor(color)
+	if color == "" {
+		return ""
+	}
 
 	return `
 X-APPLE-CALENDAR-COLOR:` + color + `
