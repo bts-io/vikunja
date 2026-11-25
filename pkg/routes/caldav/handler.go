@@ -159,6 +159,9 @@ func ProjectHandler(c *echo.Context) error {
 	}
 
 	response := caldav.HandleRequestWithConfig(c.Request(), caldavConfig(storage, ProjectHomeSetPath))
+	if c.Request().Method == "PROPFIND" && response.Status == http.StatusMultiStatus && requestsCalendarColor(body) {
+		response.Body = addCalendarColors(response.Body, storage.collectionColors)
+	}
 	response.Write(c.Response())
 	return nil
 }

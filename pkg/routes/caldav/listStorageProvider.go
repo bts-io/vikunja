@@ -62,6 +62,8 @@ type VikunjaCaldavProjectStorage struct {
 	user        *user2.User
 	isPrincipal bool
 	isEntry     bool // Entry level handling should only return a link to the principal url
+	// Colours of the collections served, by XML-escaped href
+	collectionColors map[string]string
 }
 
 // GetResources returns either all projects, links to the principal, or only one project, depending on the request
@@ -105,6 +107,7 @@ func (vcls *VikunjaCaldavProjectStorage) GetResources(rpath string, withChildren
 		}
 		r := data.NewResource(vcls.hrefFor(rpath), &rr)
 		r.Name = vcls.project.Title
+		vcls.rememberCollectionColor(&r, vcls.project.HexColor)
 
 		// If the request is withChildren (Depth: 1), we need to return all tasks of the project
 		if withChildren {
@@ -164,6 +167,7 @@ func (vcls *VikunjaCaldavProjectStorage) GetResources(rpath string, withChildren
 		}
 		r := data.NewResource(ProjectBasePath+"/"+strconv.FormatInt(l.ID, 10), &rr)
 		r.Name = l.Title
+		vcls.rememberCollectionColor(&r, l.HexColor)
 		resources = append(resources, r)
 	}
 
